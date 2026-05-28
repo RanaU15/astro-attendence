@@ -1,0 +1,64 @@
+---
+import Layout from './Layout.astro';
+import Sidebar from '../components/dashboard/Sidebar';
+import Topbar from '../components/dashboard/Topbar';
+
+interface Props {
+  title?: string;
+}
+
+const { title = "Admin Dashboard | AuraAttend" } = Astro.props;
+const activePath = Astro.url.pathname;
+---
+
+<Layout title={title}>
+  <div slot="head">
+    <!-- Inline Security Guard: Blocks access if no active Supabase session is present or user is not the admin -->
+    <script is:inline>
+      try {
+        let sessionStr = null;
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+            sessionStr = localStorage.getItem(key);
+            break;
+          }
+        }
+        
+        // If no token exists, immediately redirect to /login to prevent visual flashing
+        if (!sessionStr) {
+          window.location.replace('/login');
+        } else {
+          const sessionObj = JSON.parse(sessionStr);
+          if (
+            !sessionObj || 
+            !sessionObj.access_token || 
+            !sessionObj.user || 
+            sessionObj.user.email !== 'admin@gmail.com'
+          ) {
+            window.location.replace('/login');
+          }
+        }
+      } catch (e) {
+        console.error('Guard parse error:', e);
+        window.location.replace('/login');
+      }
+    </script>
+  </div>
+
+  <div class="min-h-screen bg-slate-50">
+    {/* Sidebar is fixed on desktop, hidden on mobile */}
+    <Sidebar activePath={activePath} client:load />
+
+    {/* Main Container */}
+    <div class="flex flex-col md:pl-64">
+      {/* Top Header Panel */}
+      <Topbar activePath={activePath} client:load />
+
+      {/* Main Content Area */}
+      <main class="flex-1 p-6 md:p-8">
+        <slot />
+      </main>
+    </div>
+  </div>
+</Layout>

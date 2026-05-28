@@ -1,0 +1,373 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { 
+  CheckCircle2, 
+  Users2, 
+  LineChart, 
+  ShieldCheck, 
+  Sparkles, 
+  ArrowRight, 
+  Clock, 
+  BookOpen, 
+  Smartphone,
+  GraduationCap
+} from 'lucide-react';
+---
+
+<Layout title="AuraAttend — Modern Attendance Tracking System" description="Manage school attendance, class rosters, and generate interactive visual reports effortlessly with AuraAttend.">
+  <div class="relative min-h-screen overflow-x-hidden bg-slate-50 selection:bg-indigo-500 selection:text-white">
+    {/* Background meshes */}
+    <div class="absolute -top-48 left-1/2 h-[600px] w-[1000px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-indigo-200/30 to-violet-300/20 blur-3xl"></div>
+
+    {/* =========================================================================
+        1. NAVBAR SECTION
+        ========================================================================= */}
+    <header class="sticky top-0 z-40 w-full border-b border-slate-200/50 bg-white/70 backdrop-blur-md">
+      <div class="mx-auto flex max-w-7xl h-16 items-center justify-between px-6 sm:px-8">
+        {/* Brand Logo */}
+        <a href="/" class="flex items-center gap-2.5 group">
+          <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-200 transition-all duration-300 group-hover:scale-105">
+            <GraduationCap class="h-5.5 w-5.5" />
+          </div>
+          <span class="text-lg font-extrabold tracking-tight text-slate-900 transition-colors group-hover:text-indigo-600">AuraAttend</span>
+        </a>
+
+        {/* Desktop Navigation Links */}
+        <nav class="hidden items-center gap-8 md:flex">
+          <a href="#features" class="text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600">Features</a>
+          <a href="#statistics" class="text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600">Statistics</a>
+          <a href="#about" class="text-sm font-semibold text-slate-600 transition-colors hover:text-indigo-600">About</a>
+        </nav>
+
+        {/* Action Button */}
+        <div>
+          <a 
+            href="/login" 
+            class="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/10 transition-all hover:bg-indigo-700 hover:shadow-indigo-700/20 active:scale-98"
+          >
+            Login Portal
+          </a>
+        </div>
+      </div>
+    </header>
+
+    {/* =========================================================================
+        2. HERO SECTION
+        ========================================================================= */}
+    <section class="relative px-6 py-20 sm:px-8 md:py-28">
+      <div class="mx-auto grid max-w-7xl gap-16 md:grid-cols-12 md:items-center">
+        {/* Hero Left Content */}
+        <div class="text-center md:col-span-6 md:text-left">
+          {/* Tagline */}
+          <div class="mx-auto mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/50 px-3.5 py-1.5 text-xs font-bold text-indigo-700 md:mx-0">
+            <Sparkles class="h-3.5 w-3.5 text-indigo-500" />
+            Empowering Modern School Coordinators
+          </div>
+          
+          <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl leading-[1.1]">
+            Next-Gen <span class="bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-white text-transparent">Attendance</span> Management.
+          </h1>
+          
+          <p class="mt-6 text-base leading-relaxed text-slate-500 sm:text-lg">
+            Track student check-ins, organize classroom schedules, configure custom reports, and visual metrics effortlessly. Built securely on Supabase database layers.
+          </p>
+          
+          {/* Call to Actions */}
+          <div class="mt-8 flex flex-col justify-center gap-4 sm:flex-row md:justify-start">
+            <a 
+              href="/login" 
+              class="inline-flex items-center justify-center gap-2 rounded-2xl bg-indigo-600 px-8 py-4 text-base font-bold text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-700 hover:shadow-indigo-700/35 active:scale-98"
+            >
+              Access Admin Portal <ArrowRight class="h-4 w-4" />
+            </a>
+          </div>
+        </div>
+
+        {/* Hero Right: High-Fidelity Code Mockup of Dashboard */}
+        <div class="relative md:col-span-6">
+          <div class="absolute -inset-1 rounded-3xl bg-gradient-to-tr from-indigo-500 to-violet-500 opacity-20 blur-xl"></div>
+          
+          {/* Main Mockup Card */}
+          <div class="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl">
+            {/* Window header */}
+            <div class="mb-4 flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex gap-1.5">
+                <span class="h-3 w-3 rounded-full bg-rose-400"></span>
+                <span class="h-3 w-3 rounded-full bg-amber-400"></span>
+                <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
+              </div>
+              <div class="rounded-lg bg-slate-50 px-3 py-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+                AuraAttend Dashboard View
+              </div>
+            </div>
+
+            {/* Mock stats grids */}
+            <div class="grid grid-cols-3 gap-3">
+              <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-3">
+                <span class="text-[10px] font-bold text-slate-400 uppercase">Total Students</span>
+                <p class="text-xl font-extrabold text-slate-800 mt-0.5">148</p>
+              </div>
+              <div class="rounded-xl border border-slate-100 bg-emerald-50/20 p-3">
+                <span class="text-[10px] font-bold text-emerald-600 uppercase">Present Today</span>
+                <p class="text-xl font-extrabold text-emerald-700 mt-0.5">132</p>
+              </div>
+              <div class="rounded-xl border border-slate-100 bg-indigo-50/20 p-3">
+                <span class="text-[10px] font-bold text-indigo-600 uppercase">Attendance</span>
+                <p class="text-xl font-extrabold text-indigo-700 mt-0.5">89%</p>
+              </div>
+            </div>
+
+            {/* Mock List View */}
+            <div class="mt-4 space-y-2">
+              <div class="flex items-center justify-between rounded-xl border border-slate-100 p-2.5 text-xs shadow-sm">
+                <div class="flex items-center gap-2">
+                  <div class="h-7 w-7 rounded-full bg-indigo-50 flex items-center justify-center font-bold text-indigo-600">JD</div>
+                  <div>
+                    <h4 class="font-bold text-slate-700">John Doe</h4>
+                    <p class="text-[9px] text-slate-400">Class Grade 10 • Roll #01</p>
+                  </div>
+                </div>
+                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700">Present</span>
+              </div>
+              
+              <div class="flex items-center justify-between rounded-xl border border-slate-100 p-2.5 text-xs shadow-sm">
+                <div class="flex items-center gap-2">
+                  <div class="h-7 w-7 rounded-full bg-violet-50 flex items-center justify-center font-bold text-violet-600">AS</div>
+                  <div>
+                    <h4 class="font-bold text-slate-700">Alice Smith</h4>
+                    <p class="text-[9px] text-slate-400">Class Grade 10 • Roll #02</p>
+                  </div>
+                </div>
+                <span class="rounded-full bg-emerald-100 px-2 py-0.5 text-[9px] font-bold text-emerald-700">Present</span>
+              </div>
+
+              <div class="flex items-center justify-between rounded-xl border border-slate-100 p-2.5 text-xs shadow-sm">
+                <div class="flex items-center gap-2">
+                  <div class="h-7 w-7 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">BJ</div>
+                  <div>
+                    <h4 class="font-bold text-slate-700">Bob Johnson</h4>
+                    <p class="text-[9px] text-slate-400">Class Grade 11 • Roll #14</p>
+                  </div>
+                </div>
+                <span class="rounded-full bg-rose-100 px-2 py-0.5 text-[9px] font-bold text-rose-700">Absent</span>
+              </div>
+            </div>
+
+            {/* Spark line bar indicators */}
+            <div class="mt-4 rounded-xl bg-slate-50 p-3">
+              <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 mb-1">
+                <span>Weekly Analytics Review</span>
+                <span class="text-indigo-600 font-semibold">94% average</span>
+              </div>
+              <div class="flex gap-1 h-3.5 items-end pt-1">
+                <span class="bg-indigo-500 rounded-sm w-full h-[85%]"></span>
+                <span class="bg-indigo-500 rounded-sm w-full h-[95%]"></span>
+                <span class="bg-indigo-300 rounded-sm w-full h-[40%]"></span>
+                <span class="bg-indigo-500 rounded-sm w-full h-[90%]"></span>
+                <span class="bg-indigo-600 rounded-sm w-full h-[98%]"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* =========================================================================
+        3. FEATURES SECTION
+        ========================================================================= */}
+    <section id="features" class="relative bg-white px-6 py-20 sm:px-8 md:py-28 border-t border-slate-100">
+      <div class="mx-auto max-w-7xl text-center">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-600">Enterprise Capabilities</h2>
+        <h3 class="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
+          Everything You Need to Track Students
+        </h3>
+        <p class="mx-auto mt-4 max-w-2xl text-base text-slate-500 leading-relaxed">
+          Robust, lightning-fast UI combined with real-time PostgreSQL listeners to manage classroom records without stress.
+        </p>
+
+        {/* Features Grids */}
+        <div class="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Card 1 */}
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-8 text-left transition-all duration-300 hover:border-slate-300 hover:bg-white hover:shadow-lg hover:shadow-slate-100/50 group">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+              <CheckCircle2 class="h-6 w-6" />
+            </div>
+            <h4 class="text-lg font-bold text-slate-800">One-Tap Attendance</h4>
+            <p class="mt-3 text-sm leading-relaxed text-slate-500">
+              Mark entire classes present or absent in seconds. Bulk upserts execute asynchronously on Supabase DB with zero lag.
+            </p>
+          </div>
+
+          {/* Card 2 */}
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-8 text-left transition-all duration-300 hover:border-slate-300 hover:bg-white hover:shadow-lg hover:shadow-slate-100/50 group">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-600 transition-colors group-hover:bg-violet-600 group-hover:text-white">
+              <Users2 class="h-6 w-6" />
+            </div>
+            <h4 class="text-lg font-bold text-slate-800">Student Directory</h4>
+            <p class="mt-3 text-sm leading-relaxed text-slate-500">
+              Create, read, update, and delete student rosters with active search filters, roll numbers, and clean classifications.
+            </p>
+          </div>
+
+          {/* Card 3 */}
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-8 text-left transition-all duration-300 hover:border-slate-300 hover:bg-white hover:shadow-lg hover:shadow-slate-100/50 group">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+              <LineChart class="h-6 w-6" />
+            </div>
+            <h4 class="text-lg font-bold text-slate-800">Rich Reports & Charts</h4>
+            <p class="mt-3 text-sm leading-relaxed text-slate-500">
+              Generate weekly and monthly analytics using gorgeous Recharts integrations. Spot absent trends in classes instantly.
+            </p>
+          </div>
+
+          {/* Card 4 */}
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-8 text-left transition-all duration-300 hover:border-slate-300 hover:bg-white hover:shadow-lg hover:shadow-slate-100/50 group">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-600 transition-colors group-hover:bg-violet-600 group-hover:text-white">
+              <ShieldCheck class="h-6 w-6" />
+            </div>
+            <h4 class="text-lg font-bold text-slate-800">Supabase Secure Auth</h4>
+            <p class="mt-3 text-sm leading-relaxed text-slate-500">
+              Role-based admin access control with secure email authentication, password encryptions, and session cookies.
+            </p>
+          </div>
+
+          {/* Card 5 */}
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-8 text-left transition-all duration-300 hover:border-slate-300 hover:bg-white hover:shadow-lg hover:shadow-slate-100/50 group">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 transition-colors group-hover:bg-indigo-600 group-hover:text-white">
+              <Clock class="h-6 w-6" />
+            </div>
+            <h4 class="text-lg font-bold text-slate-800">Calendar Selectors</h4>
+            <p class="mt-3 text-sm leading-relaxed text-slate-500">
+              Retrieve roster history for any date in the past. Correct marking errors seamlessly by overwriting older entries.
+            </p>
+          </div>
+
+          {/* Card 6 */}
+          <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-8 text-left transition-all duration-300 hover:border-slate-300 hover:bg-white hover:shadow-lg hover:shadow-slate-100/50 group">
+            <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-600 transition-colors group-hover:bg-violet-600 group-hover:text-white">
+              <Smartphone class="h-6 w-6" />
+            </div>
+            <h4 class="text-lg font-bold text-slate-800">Edge Worker Hosting</h4>
+            <p class="mt-3 text-sm leading-relaxed text-slate-500">
+              Optimized for Cloudflare Pages server rendering. Loads with near-zero latency worldwide from edge cache zones.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* =========================================================================
+        4. STATISTICS SECTION
+        ========================================================================= */}
+    <section id="statistics" class="bg-indigo-900 text-white px-6 py-20 sm:px-8 md:py-24 relative overflow-hidden">
+      <div class="absolute -right-20 -top-20 h-80 w-80 rounded-full bg-indigo-500/20 blur-3xl"></div>
+      
+      <div class="mx-auto max-w-7xl text-center relative z-10">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-indigo-300">Empirical Performance</h2>
+        <h3 class="mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">System Speed Indicators</h3>
+        
+        <div class="mt-16 grid grid-cols-2 gap-8 md:grid-cols-4">
+          <div>
+            <p class="text-4xl font-extrabold sm:text-5xl">99.9%</p>
+            <p class="text-indigo-200 text-sm font-semibold mt-2">Server Uptime</p>
+          </div>
+          <div>
+            <p class="text-4xl font-extrabold sm:text-5xl">&lt; 80ms</p>
+            <p class="text-indigo-200 text-sm font-semibold mt-2">API Response Latency</p>
+          </div>
+          <div>
+            <p class="text-4xl font-extrabold sm:text-5xl">1-Click</p>
+            <p class="text-indigo-200 text-sm font-semibold mt-2">Daily Sheet Submission</p>
+          </div>
+          <div>
+            <p class="text-4xl font-extrabold sm:text-5xl">100%</p>
+            <p class="text-indigo-200 text-sm font-semibold mt-2">Database Encryption</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* =========================================================================
+        5. ABOUT SECTION
+        ========================================================================= */}
+    <section id="about" class="bg-white px-6 py-20 sm:px-8 md:py-28">
+      <div class="mx-auto max-w-5xl">
+        <div class="grid gap-12 md:grid-cols-2 md:items-center">
+          <div class="space-y-6">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Our Motivation</span>
+            <h3 class="text-3xl font-extrabold text-slate-900 tracking-tight">Making Roll Call Simple</h3>
+            <p class="text-slate-500 text-base leading-relaxed">
+              We started AuraAttend to solve a persistent bottleneck in educational management: bulky, slow, and outdated attendance programs. Most legacy school administrative boards run on local servers that crash or require manual paperwork logs.
+            </p>
+            <p class="text-slate-500 text-base leading-relaxed">
+              AuraAttend is a fully cloud-native edge application. It leverages Cloudflare's serverless nodes to offer teachers a rapid roll-call tool on their smartphones while logging high-integrity records in Supabase's reliable PostgreSQL structure.
+            </p>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-6 flex gap-4">
+              <div class="h-10 w-10 shrink-0 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <BookOpen class="h-5 w-5" />
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-800">Classroom Organization</h4>
+                <p class="text-sm text-slate-500 mt-1">Easily filter student lists by grade or department categories for clean segregation.</p>
+              </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-100 bg-slate-50 p-6 flex gap-4">
+              <div class="h-10 w-10 shrink-0 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+                <Sparkles class="h-5 w-5" />
+              </div>
+              <div>
+                <h4 class="font-bold text-slate-800">Zero-Fluff Analytics</h4>
+                <p class="text-sm text-slate-500 mt-1">Get precise percentage charts without bloated menus or overcomplicated charts.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    {/* =========================================================================
+        6. CTA SECTION
+        ========================================================================= */}
+    <section class="bg-slate-50 px-6 py-20 sm:px-8 border-t border-slate-200/50">
+      <div class="mx-auto max-w-4xl rounded-3xl bg-gradient-to-tr from-indigo-600 to-violet-600 p-12 text-center text-white shadow-2xl relative overflow-hidden">
+        <div class="absolute -left-20 -bottom-20 h-60 w-60 rounded-full bg-white/10 blur-2xl"></div>
+        
+        <h3 class="text-3xl font-extrabold tracking-tight sm:text-4xl relative z-10">
+          Access AuraAttend Workspace
+        </h3>
+        <p class="mx-auto mt-4 max-w-lg text-indigo-100 text-sm leading-relaxed relative z-10">
+          Log in to your secure administrator workspace to manage class rosters, track student check-ins, and view attendance sheets.
+        </p>
+        <div class="mt-8 flex justify-center gap-4 relative z-10">
+          <a 
+            href="/login" 
+            class="inline-flex items-center justify-center rounded-2xl bg-white px-7 py-3.5 text-base font-bold text-indigo-600 shadow-md transition-all hover:bg-slate-50 active:scale-98"
+          >
+            Sign In to Portal
+          </a>
+        </div>
+      </div>
+    </section>
+
+    {/* =========================================================================
+        7. FOOTER SECTION
+        ========================================================================= */}
+    <footer class="bg-white border-t border-slate-200 py-12 px-6 sm:px-8">
+      <div class="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-2">
+          <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white font-bold">
+            <GraduationCap class="h-5 w-5" />
+          </div>
+          <span class="font-extrabold text-slate-800 text-md">AuraAttend</span>
+        </div>
+        <p class="text-sm text-slate-400">
+          © {new Date().getFullYear()} AuraAttend Inc. All rights reserved. Cloudflare Pages Ready.
+        </p>
+      </div>
+    </footer>
+  </div>
+</Layout>

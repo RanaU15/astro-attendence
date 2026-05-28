@@ -1,0 +1,9 @@
+---
+import DashLayout from '../layouts/DashLayout.astro';
+import DashboardContent from '../components/dashboard/DashboardContent';
+---
+
+<DashLayout title="Dashboard | AuraAttend">
+  {/* Load the Interactive React Dashboard with client side hydrating */}
+  <DashboardContent client:load />
+</DashLayout>

@@ -1,0 +1,9 @@
+---
+import DashLayout from '../layouts/DashLayout.astro';
+import AttendanceContent from '../components/attendance/AttendanceContent';
+---
+
+<DashLayout title="Attendance Sheet | AuraAttend">
+  {/* Mount React Interactive Roll-Call Board */}
+  <AttendanceContent client:load />
+</DashLayout>

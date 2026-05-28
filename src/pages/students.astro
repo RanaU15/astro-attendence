@@ -1,0 +1,9 @@
+---
+import DashLayout from '../layouts/DashLayout.astro';
+import StudentContent from '../components/students/StudentContent';
+---
+
+<DashLayout title="Student Directory | AuraAttend">
+  {/* Mount React Interactive Directory Component */}
+  <StudentContent client:load />
+</DashLayout>

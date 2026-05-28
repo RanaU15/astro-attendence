@@ -1,0 +1,9 @@
+---
+import DashLayout from '../layouts/DashLayout.astro';
+import ReportsContent from '../components/charts/ReportsContent';
+---
+
+<DashLayout title="Roster Analytics | AuraAttend">
+  {/* Mount React Interactive Analytics Component */}
+  <ReportsContent client:load />
+</DashLayout>
