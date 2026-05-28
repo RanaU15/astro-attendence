@@ -1,6 +1,8 @@
 {
 	"compatibility_date": "2026-05-28",
-	"compatibility_flags": ["global_fetch_strictly_public"],
+	"compatibility_flags": [
+		"global_fetch_strictly_public"
+	],
 	"name": "attendence-website",
 	"main": "@astrojs/cloudflare/entrypoints/server",
 	"assets": {
