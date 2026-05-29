@@ -24,7 +24,7 @@ export default function Topbar({ activePath }: TopbarProps) {
   const getPageTitle = () => {
     if (activePath.startsWith('/dashboard')) return 'Dashboard Overview';
     if (activePath.startsWith('/attendance')) return 'Attendance Ledger';
-    if (activePath.startsWith('/students')) return 'Student Directory';
+    if (activePath.startsWith('/students')) return 'Employee Roster Directory';
     if (activePath.startsWith('/reports')) return 'Reports & Insights';
     return 'Admin Panel';
   };
@@ -41,7 +41,7 @@ export default function Topbar({ activePath }: TopbarProps) {
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Attendance', path: '/attendance', icon: CheckSquare },
-    { name: 'Students', path: '/students', icon: Users },
+    { name: 'Employees', path: '/students', icon: Users },
     { name: 'Reports', path: '/reports', icon: BarChart3 },
   ];
 

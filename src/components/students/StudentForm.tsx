@@ -1,37 +1,39 @@
 import React, { useState, useEffect } from 'react';
 import { X, Loader2, UserPlus, Check } from 'lucide-react';
-import type { Student } from '../../types';
-import { addStudent, updateStudent } from '../../services/db';
+import type { Employee } from '../../types';
+import { addEmployee, updateEmployee } from '../../services/db';
 
-interface StudentFormProps {
-  student?: Student | null; // If provided, we are in Edit Mode
+interface EmployeeFormProps {
+  employee?: Employee | null; // If provided, we are in Edit Mode
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function StudentForm({ student, onClose, onSuccess }: StudentFormProps) {
-  const [fullName, setFullName] = useState('');
+export default function EmployeeForm({ employee, onClose, onSuccess }: EmployeeFormProps) {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [rollNumber, setRollNumber] = useState('');
-  const [className, setClassName] = useState('Grade 10');
+  const [employeeIdCode, setEmployeeIdCode] = useState('');
+  const [phone, setPhone] = useState('');
+  const [role, setRole] = useState('Employee');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isEditMode = !!student;
+  const isEditMode = !!employee;
 
   useEffect(() => {
-    if (student) {
-      setFullName(student.full_name);
-      setEmail(student.email);
-      setRollNumber(student.roll_number);
-      setClassName(student.class_name);
+    if (employee) {
+      setName(employee.name);
+      setEmail(employee.email);
+      setEmployeeIdCode(employee.employee_id);
+      setPhone(employee.phone || '');
+      setRole(employee.role);
     }
-  }, [student]);
+  }, [employee]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName || !email || !rollNumber || !className) {
-      setError('All fields are required.');
+    if (!name || !email || !employeeIdCode || !role) {
+      setError('Name, email, employee ID and role are required.');
       return;
     }
 
@@ -39,27 +41,28 @@ export default function StudentForm({ student, onClose, onSuccess }: StudentForm
     setError(null);
 
     const payload = {
-      full_name: fullName,
+      name,
       email,
-      roll_number: rollNumber,
-      class_name: className,
+      employee_id: employeeIdCode,
+      phone,
+      role
     };
 
     try {
-      if (isEditMode && student) {
-        await updateStudent(student.id, payload);
+      if (isEditMode && employee) {
+        await updateEmployee(employee.employee_id, payload);
       } else {
-        await addStudent(payload);
+        await addEmployee(payload);
       }
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Failed to save student record.');
+      setError(err.message || 'Failed to save employee record.');
     } finally {
       setLoading(false);
     }
   };
 
-  const classList = ['Grade 10', 'Grade 11', 'Grade 12', 'B.Sc CS', 'BCA', 'MCA'];
+  const roleList = ['Employee', 'Admin'];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
@@ -68,10 +71,10 @@ export default function StudentForm({ student, onClose, onSuccess }: StudentForm
         <div className="mb-6 flex items-center justify-between border-b border-slate-100 pb-4">
           <div>
             <h3 className="text-lg font-bold text-slate-800">
-              {isEditMode ? 'Edit Student Profile' : 'Add New Student'}
+              {isEditMode ? 'Edit Employee Profile' : 'Register New Employee'}
             </h3>
             <p className="text-xs text-slate-400 font-semibold mt-0.5">
-              {isEditMode ? 'Modify enrolled student credentials' : 'Enlist a new student to AuraAttend'}
+              {isEditMode ? 'Modify enrolled employee credentials' : 'Enlist a new employee to AuraAttend APK backend'}
             </p>
           </div>
           <button
@@ -96,8 +99,8 @@ export default function StudentForm({ student, onClose, onSuccess }: StudentForm
             <input
               type="text"
               required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               placeholder="e.g. John Doe"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
             />
@@ -111,37 +114,50 @@ export default function StudentForm({ student, onClose, onSuccess }: StudentForm
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="john.doe@school.com"
+              placeholder="john.doe@company.com"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
             />
           </div>
 
-          {/* Roll Number & Class Name Group */}
+          {/* Phone */}
+          <div className="space-y-1">
+            <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Phone Number</label>
+            <input
+              type="text"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="e.g. +91 9876543210"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+            />
+          </div>
+
+          {/* Employee ID & Role Group */}
           <div className="grid gap-4 sm:grid-cols-2">
-            {/* Roll Number */}
+            {/* Employee ID */}
             <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Roll Number</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Employee ID / Code</label>
               <input
                 type="text"
                 required
-                value={rollNumber}
-                onChange={(e) => setRollNumber(e.target.value)}
-                placeholder="e.g. ROLL-101"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
+                disabled={isEditMode}
+                value={employeeIdCode}
+                onChange={(e) => setEmployeeIdCode(e.target.value)}
+                placeholder="e.g. 101"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 disabled:opacity-60"
               />
             </div>
 
-            {/* Class Name Selector */}
+            {/* Role Selector */}
             <div className="space-y-1">
-              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Assign Classroom</label>
+              <label className="text-xs font-bold uppercase tracking-wider text-slate-500">Assign Authority Role</label>
               <select
-                value={className}
-                onChange={(e) => setClassName(e.target.value)}
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-500/10"
               >
-                {classList.map((cls) => (
-                  <option key={cls} value={cls}>
-                    {cls}
+                {roleList.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
                   </option>
                 ))}
               </select>

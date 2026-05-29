@@ -1,321 +1,213 @@
 import { supabase } from '../lib/supabase';
-import type { Student, Attendance, AttendanceStatus, DashboardMetrics, WeeklyAttendanceData, MonthlyAttendanceData, ClassAttendanceSummary, StudentAttendanceStats } from '../types';
+import type { DashboardMetrics, WeeklyActivityTrend, DepartmentSummary } from '../types';
 
-// ============================================================================
-// STUDENT MANAGEMENT CRUD
-// ============================================================================
-
-/**
- * Fetches all students from the database, ordered by full name.
- */
-export async function getAllStudents(): Promise<Student[]> {
-  const { data, error } = await supabase
-    .from('students')
-    .select('*')
-    .order('full_name', { ascending: true });
-
-  if (error) {
-    console.error('Error fetching students:', error);
-    throw error;
-  }
-  return data || [];
-}
+// Re-export modular services for absolute backward compatibility and modular architecture
+export * from './employeeService';
+export * from './attendanceService';
+export * from './travelService';
 
 /**
- * Adds a new student record.
+ * Finds the latest date containing any check-in or travel session records in the database.
+ * If none exists, falls back to today's date.
  */
-export async function addStudent(student: Omit<Student, 'id' | 'created_at'>): Promise<Student> {
-  const { data, error } = await supabase
-    .from('students')
-    .insert([student])
-    .select()
-    .single();
+export async function getLatestActiveDate(): Promise<string> {
+  console.log('[DEBUG] Calling getLatestActiveDate()...');
+  try {
+    const [attResult, travelResult] = await Promise.all([
+      supabase.from('attendance').select('created_at').order('created_at', { ascending: false }).limit(1),
+      supabase.from('travel_sessions').select('created_at').order('created_at', { ascending: false }).limit(1)
+    ]);
 
-  if (error) {
-    console.error('Error adding student:', error);
-    throw error;
-  }
-  return data;
-}
+    let latestDate = new Date();
+    let latestTime = 0;
 
-/**
- * Updates an existing student record.
- */
-export async function updateStudent(id: string, updates: Partial<Student>): Promise<Student> {
-  const { data, error } = await supabase
-    .from('students')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
+    if (attResult.data && attResult.data.length > 0) {
+      const d = new Date(attResult.data[0].created_at);
+      if (d.getTime() > latestTime) {
+        latestTime = d.getTime();
+        latestDate = d;
+      }
+    }
 
-  if (error) {
-    console.error('Error updating student:', error);
-    throw error;
-  }
-  return data;
-}
+    if (travelResult.data && travelResult.data.length > 0) {
+      const d = new Date(travelResult.data[0].created_at);
+      if (d.getTime() > latestTime) {
+        latestTime = d.getTime();
+        latestDate = d;
+      }
+    }
 
-/**
- * Deletes a student record (will cascade delete their attendance records).
- */
-export async function deleteStudent(id: string): Promise<void> {
-  const { error } = await supabase
-    .from('students')
-    .delete()
-    .eq('id', id);
-
-  if (error) {
-    console.error('Error deleting student:', error);
-    throw error;
+    const formatted = latestDate.toISOString().split('T')[0];
+    console.log('[DEBUG] Detected latest active database log date:', formatted);
+    return formatted;
+  } catch (err) {
+    console.warn('[DEBUG] Error finding latest active date, defaulting to today:', err);
+    return new Date().toISOString().split('T')[0];
   }
 }
 
-// ============================================================================
-// ATTENDANCE TRACKING OPERATIONS
-// ============================================================================
-
 /**
- * Retrieves the attendance records for a specific date and class.
- * Returns a list of students joined with their attendance status (if marked).
- */
-export async function getAttendanceByDateAndClass(
-  dateStr: string,
-  className: string
-): Promise<{ student: Student; attendanceId: string | null; status: AttendanceStatus | null }[]> {
-  // 1. Get all students in the specified class
-  let studentQuery = supabase.from('students').select('*');
-  if (className && className !== 'All') {
-    studentQuery = studentQuery.eq('class_name', className);
-  }
-  const { data: students, error: studentError } = await studentQuery.order('full_name', { ascending: true });
-
-  if (studentError) throw studentError;
-  if (!students || students.length === 0) return [];
-
-  // 2. Fetch all attendance marked for these students on the given date
-  const studentIds = students.map((s) => s.id);
-  const { data: attendanceList, error: attError } = await supabase
-    .from('attendance')
-    .select('*')
-    .eq('attendance_date', dateStr)
-    .in('student_id', studentIds);
-
-  if (attError) throw attError;
-
-  // 3. Map students to their attendance status
-  const attendanceMap = new Map<string, Attendance>();
-  attendanceList?.forEach((record) => {
-    attendanceMap.set(record.student_id, record);
-  });
-
-  return students.map((student) => {
-    const record = attendanceMap.get(student.id);
-    return {
-      student,
-      attendanceId: record?.id || null,
-      status: record?.status || null,
-    };
-  });
-}
-
-/**
- * Saves a list of attendance records (Present / Absent) to the database.
- * Uses bulk upsert to either create new records or overwrite existing records for the same day.
- */
-export async function saveAttendanceBatch(
-  records: Omit<Attendance, 'id' | 'created_at'>[]
-): Promise<void> {
-  if (records.length === 0) return;
-
-  const { error } = await supabase
-    .from('attendance')
-    .upsert(records, {
-      onConflict: 'student_id,attendance_date',
-    });
-
-  if (error) {
-    console.error('Error saving attendance batch:', error);
-    throw error;
-  }
-}
-
-// ============================================================================
-// DASHBOARD METRICS & ANALYTICS
-// ============================================================================
-
-/**
- * Fetches dashboard card metric statistics.
+ * Fetches dashboard card metrics for today from the real Supabase tables.
  */
 export async function getDashboardMetrics(dateStr: string): Promise<DashboardMetrics> {
-  // 1. Get total students count
-  const { count: totalStudents, error: studentErr } = await supabase
-    .from('students')
-    .select('*', { count: 'exact', head: true });
+  console.log(`[DEBUG] Calling getDashboardMetrics(${dateStr})...`);
+  try {
+    // 1. Get total employees count
+    const { count: totalEmployees, error: empErr } = await supabase
+      .from('employees')
+      .select('*', { count: 'exact', head: true });
 
-  if (studentErr) throw studentErr;
+    if (empErr) throw empErr;
 
-  // 2. Get attendance counts for today
-  const { data: attendanceToday, error: attErr } = await supabase
-    .from('attendance')
-    .select('status')
-    .eq('attendance_date', dateStr);
+    // 2. Get attendance logs today (all check-ins/check-outs)
+    const { data: attendanceToday, error: attErr } = await supabase
+      .from('attendance')
+      .select('employee_id, clock_type')
+      .gte('created_at', `${dateStr}T00:00:00Z`)
+      .lte('created_at', `${dateStr}T23:59:59Z`);
 
-  if (attErr) throw attErr;
+    if (attErr) throw attErr;
 
-  let presentToday = 0;
-  let absentToday = 0;
+    // 3. Get total travel sessions today
+    const { count: totalTravelToday, error: travelErr } = await supabase
+      .from('travel_sessions')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', `${dateStr}T00:00:00Z`)
+      .lte('created_at', `${dateStr}T23:59:59Z`);
 
-  attendanceToday?.forEach((r) => {
-    if (r.status === 'Present') presentToday++;
-    if (r.status === 'Absent') absentToday++;
-  });
+    if (travelErr) throw travelErr;
 
-  const totalStudentsVal = totalStudents || 0;
-  const markedToday = presentToday + absentToday;
-  
-  // Calculate attendance percentage. If no attendance marked today, base it on history or return 100%
-  const attendancePercentage = markedToday > 0 
-    ? Math.round((presentToday / markedToday) * 100)
-    : 100;
+    // Distinct active employees are those who clocked in/out today
+    const activeEmpSet = new Set(attendanceToday?.map(log => String(log.employee_id)) || []);
+    const activeEmployees = activeEmpSet.size;
 
-  return {
-    totalStudents: totalStudentsVal,
-    presentToday,
-    absentToday,
-    attendancePercentage,
-  };
-}
+    // Total attendance today is total check-in actions
+    const totalAttendanceToday = attendanceToday?.filter(log => log.clock_type === 'Login').length || 0;
 
-/**
- * Generates daily attendance stats for the last 5 active school days.
- */
-export async function getWeeklyAttendanceTrend(endDateStr: string): Promise<WeeklyAttendanceData[]> {
-  const { data: attendanceData, error } = await supabase
-    .from('attendance')
-    .select('attendance_date, status')
-    .order('attendance_date', { ascending: false })
-    .limit(200); // Retrieve recent records
+    console.log(`[DEBUG] Dashboard metrics compiled for ${dateStr}:`, {
+      totalEmployees,
+      activeEmployees,
+      totalTravelToday,
+      totalAttendanceToday
+    });
 
-  if (error) throw error;
-
-  // Group by date
-  const dateGroups = new Map<string, { present: number; absent: number }>();
-  
-  attendanceData?.forEach((record) => {
-    const date = record.attendance_date;
-    const current = dateGroups.get(date) || { present: 0, absent: 0 };
-    if (record.status === 'Present') current.present++;
-    else current.absent++;
-    dateGroups.set(date, current);
-  });
-
-  // Sort dates ascending
-  const sortedDates = Array.from(dateGroups.keys()).sort().slice(-5); // Get last 5 days
-
-  return sortedDates.map((date) => {
-    const stats = dateGroups.get(date)!;
-    // Format date from YYYY-MM-DD to readable format like "May 28"
-    const parsedDate = new Date(date);
-    const dayName = parsedDate.toLocaleDateString('en-US', { weekday: 'short' });
     return {
-      date: dayName,
-      Present: stats.present,
-      Absent: stats.absent,
+      totalEmployees: totalEmployees || 0,
+      activeEmployees: activeEmployees,
+      totalTravelToday: totalTravelToday || 0,
+      totalAttendanceToday: totalAttendanceToday
     };
-  });
-}
-
-/**
- * Fetches attendance rates grouped by Class.
- */
-export async function getClassSummaryReport(dateStr: string): Promise<ClassAttendanceSummary[]> {
-  // 1. Get all students
-  const { data: students, error: studentErr } = await supabase.from('students').select('*');
-  if (studentErr) throw studentErr;
-
-  // 2. Get today's attendance
-  const { data: attendance, error: attErr } = await supabase
-    .from('attendance')
-    .select('*')
-    .eq('attendance_date', dateStr);
-  if (attErr) throw attErr;
-
-  // Map attendance status by student ID
-  const attendanceMap = new Map<string, string>();
-  attendance?.forEach((r) => {
-    attendanceMap.set(r.student_id, r.status);
-  });
-
-  // Group students by class
-  const classGroups = new Map<string, { total: number; present: number; absent: number }>();
-  students?.forEach((s) => {
-    const current = classGroups.get(s.class_name) || { total: 0, present: 0, absent: 0 };
-    current.total++;
-    
-    const status = attendanceMap.get(s.id);
-    if (status === 'Present') current.present++;
-    else if (status === 'Absent') current.absent++;
-    
-    classGroups.set(s.class_name, current);
-  });
-
-  return Array.from(classGroups.entries()).map(([class_name, stats]) => {
-    const marked = stats.present + stats.absent;
-    const percentage = marked > 0 ? Math.round((stats.present / marked) * 100) : 100;
+  } catch (err) {
+    console.error('[DEBUG] Error fetching real dashboard metrics:', err);
     return {
-      class_name,
-      total: stats.total,
-      present: stats.present,
-      absent: stats.absent,
-      percentage,
+      totalEmployees: 0,
+      activeEmployees: 0,
+      totalTravelToday: 0,
+      totalAttendanceToday: 0
     };
-  });
-}
-
-/**
- * Computes individual analytics for all students inside a specific class.
- */
-export async function getStudentWiseAttendanceReport(
-  className: string
-): Promise<StudentAttendanceStats[]> {
-  // 1. Get all students in this class
-  let studentQuery = supabase.from('students').select('*');
-  if (className && className !== 'All') {
-    studentQuery = studentQuery.eq('class_name', className);
   }
-  const { data: students, error: studentErr } = await studentQuery;
-  if (studentErr) throw studentErr;
-  if (!students || students.length === 0) return [];
+}
 
-  // 2. Fetch all attendance history for these student IDs
-  const studentIds = students.map((s) => s.id);
-  const { data: attendanceHistory, error: attErr } = await supabase
-    .from('attendance')
-    .select('student_id, status')
-    .in('student_id', studentIds);
+/**
+ * Generates daily activity trends for the last 5 calendar days.
+ */
+export async function getWeeklyActivityTrend(endDateStr: string): Promise<WeeklyActivityTrend[]> {
+  console.log(`[DEBUG] Calling getWeeklyActivityTrend(${endDateStr})...`);
+  try {
+    const end = new Date(endDateStr);
+    const trendData: WeeklyActivityTrend[] = [];
 
-  if (attErr) throw attErr;
+    // Construct the last 5 days
+    for (let i = 4; i >= 0; i--) {
+      const d = new Date(end);
+      d.setDate(end.getDate() - i);
+      const targetDateStr = d.toISOString().split('T')[0];
 
-  // Map attendance by student id
-  const studentAttMap = new Map<string, { total: number; present: number; absent: number }>();
-  attendanceHistory?.forEach((r) => {
-    const current = studentAttMap.get(r.student_id) || { total: 0, present: 0, absent: 0 };
-    current.total++;
-    if (r.status === 'Present') current.present++;
-    else current.absent++;
-    studentAttMap.set(r.student_id, current);
-  });
+      // Fetch attendance and travels for this day
+      const [attRes, travelRes] = await Promise.all([
+        supabase
+          .from('attendance')
+          .select('id')
+          .gte('created_at', `${targetDateStr}T00:00:00Z`)
+          .lte('created_at', `${targetDateStr}T23:59:59Z`),
+        supabase
+          .from('travel_sessions')
+          .select('id')
+          .gte('created_at', `${targetDateStr}T00:00:00Z`)
+          .lte('created_at', `${targetDateStr}T23:59:59Z`)
+      ]);
 
-  return students.map((student) => {
-    const stats = studentAttMap.get(student.id) || { total: 0, present: 0, absent: 0 };
-    const percentage = stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 100;
-    return {
-      student,
-      totalDays: stats.total,
-      presentDays: stats.present,
-      absentDays: stats.absent,
-      percentage,
-    };
-  });
+      const dayName = d.toLocaleDateString('en-US', { weekday: 'short' });
+      trendData.push({
+        date: dayName,
+        Logins: attRes.data?.length || 0,
+        Travels: travelRes.data?.length || 0
+      });
+    }
+
+    console.log('[DEBUG] Compiled weekly trend:', trendData);
+    return trendData;
+  } catch (err) {
+    console.error('[DEBUG] Error fetching weekly trend logs:', err);
+    return [];
+  }
+}
+
+/**
+ * Generates an activity summary grouped by role (Admin vs Employee).
+ */
+export async function getRoleSummaryReport(dateStr: string): Promise<DepartmentSummary[]> {
+  console.log(`[DEBUG] Calling getRoleSummaryReport(${dateStr})...`);
+  try {
+    // 1. Get all employees
+    const { data: employees, error: empErr } = await supabase
+      .from('employees')
+      .select('employee_id, role');
+
+    if (empErr) throw empErr;
+
+    // 2. Get attendance logs today
+    const { data: attendanceToday, error: attErr } = await supabase
+      .from('attendance')
+      .select('employee_id')
+      .gte('created_at', `${dateStr}T00:00:00Z`)
+      .lte('created_at', `${dateStr}T23:59:59Z`);
+
+    if (attErr) throw attErr;
+
+    const activeEmpSet = new Set(attendanceToday?.map(log => String(log.employee_id)) || []);
+
+    // Group by role
+    const groups = new Map<string, { total: number; active: number }>();
+    
+    // Set standard roles to guarantee they appear
+    groups.set('Employee', { total: 0, active: 0 });
+    groups.set('Admin', { total: 0, active: 0 });
+
+    employees?.forEach(emp => {
+      const roleName = emp.role || 'Employee';
+      const stats = groups.get(roleName) || { total: 0, active: 0 };
+      stats.total++;
+      if (activeEmpSet.has(String(emp.employee_id))) {
+        stats.active++;
+      }
+      groups.set(roleName, stats);
+    });
+
+    const report = Array.from(groups.entries()).map(([role, stats]) => {
+      const percentage = stats.total > 0 ? Math.round((stats.active / stats.total) * 100) : 0;
+      return {
+        department: role,
+        total: stats.total,
+        active: stats.active,
+        percentage
+      };
+    });
+
+    console.log('[DEBUG] Compiled role summary report:', report);
+    return report;
+  } catch (err) {
+    console.error('[DEBUG] Error generating role summary report:', err);
+    return [];
+  }
 }

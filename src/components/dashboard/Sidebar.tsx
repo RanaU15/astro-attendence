@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Users, CheckSquare, BarChart3, Settings, LogOut, GraduationCap } from 'lucide-react';
+import { LayoutDashboard, Users, CheckSquare, BarChart3, Settings, LogOut, GraduationCap, Compass } from 'lucide-react';
 import { signOutUser } from '../../services/auth';
 
 interface SidebarProps {
@@ -10,7 +10,8 @@ export default function Sidebar({ activePath }: SidebarProps) {
   const menuItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Attendance', path: '/attendance', icon: CheckSquare },
-    { name: 'Students', path: '/students', icon: Users },
+    { name: 'Travel Tracker', path: '/travel', icon: Compass },
+    { name: 'Employees', path: '/students', icon: Users },
     { name: 'Reports', path: '/reports', icon: BarChart3 },
   ];
 

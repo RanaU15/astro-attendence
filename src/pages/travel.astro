@@ -1,0 +1,9 @@
+---
+import DashLayout from '../layouts/DashLayout.astro';
+import TravelContent from '../components/travel/TravelContent';
+---
+
+<DashLayout title="Travel Tracker | AuraAttend">
+  {/* Mount React Interactive Travel Auditor */}
+  <TravelContent client:load />
+</DashLayout>

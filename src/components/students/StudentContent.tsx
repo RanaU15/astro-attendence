@@ -5,103 +5,103 @@ import {
   Edit2, 
   Trash2, 
   Loader2, 
-  GraduationCap, 
   ChevronLeft, 
   ChevronRight,
-  School,
-  Inbox
+  Shield,
+  Inbox,
+  Phone
 } from 'lucide-react';
-import type { Student } from '../../types';
-import { getAllStudents, deleteStudent } from '../../services/db';
-import StudentForm from './StudentForm';
+import type { Employee } from '../../types';
+import { getAllEmployees, deleteEmployee } from '../../services/db';
+import StudentForm from './StudentForm'; // Reuses the file but maps to EmployeeForm inside
 
 export default function StudentContent() {
-  const [students, setStudents] = useState<Student[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedClass, setSelectedClass] = useState('All');
+  const [selectedRole, setSelectedRole] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
 
   const itemsPerPage = 8;
 
-  const fetchStudents = async () => {
+  const fetchEmployeesList = async () => {
     setLoading(true);
     try {
-      const data = await getAllStudents();
-      setStudents(data);
+      const data = await getAllEmployees();
+      setEmployees(data);
     } catch (err) {
-      console.error('Error fetching students:', err);
+      console.error('Error fetching employees list:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchStudents();
+    fetchEmployeesList();
   }, []);
 
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Are you absolutely sure you want to delete ${name}? This will cascade delete their entire attendance history.`)) {
+  const handleDelete = async (employeeId: string, name: string) => {
+    if (window.confirm(`Are you absolutely sure you want to delete employee ${name}? This will cascade delete their entire attendance and travel history.`)) {
       try {
-        await deleteStudent(id);
-        fetchStudents();
+        await deleteEmployee(employeeId);
+        fetchEmployeesList();
       } catch (err) {
-        alert('Failed to delete student.');
+        alert('Failed to delete employee.');
       }
     }
   };
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
-    setEditingStudent(null);
-    fetchStudents();
+    setEditingEmployee(null);
+    fetchEmployeesList();
   };
 
-  const handleEditClick = (student: Student) => {
-    setEditingStudent(student);
+  const handleEditClick = (emp: Employee) => {
+    setEditingEmployee(emp);
     setIsFormOpen(true);
   };
 
   const handleAddClick = () => {
-    setEditingStudent(null);
+    setEditingEmployee(null);
     setIsFormOpen(true);
   };
 
-  // Filter students based on search query and classroom selector
-  const filteredStudents = students.filter((student) => {
+  // Filter employees based on search query and role filter
+  const filteredEmployees = employees.filter((emp) => {
     const matchesSearch = 
-      student.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.roll_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchQuery.toLowerCase());
+      emp.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.employee_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      emp.email.toLowerCase().includes(searchQuery.toLowerCase());
     
-    const matchesClass = selectedClass === 'All' || student.class_name === selectedClass;
+    const matchesRole = selectedRole === 'All' || emp.role === selectedRole;
 
-    return matchesSearch && matchesClass;
+    return matchesSearch && matchesRole;
   });
 
   // Calculate pagination variables
-  const totalPages = Math.ceil(filteredStudents.length / itemsPerPage) || 1;
+  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage) || 1;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedStudents = filteredStudents.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedEmployees = filteredEmployees.slice(startIndex, startIndex + itemsPerPage);
 
-  const classes = ['All', 'Grade 10', 'Grade 11', 'Grade 12', 'B.Sc CS', 'BCA', 'MCA'];
+  const roles = ['All', 'Employee', 'Admin'];
 
   return (
     <div className="space-y-6">
       {/* 1. Header Area */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Student Directory</h1>
-          <p className="text-sm font-medium text-slate-500">Add, manage, and edit student enrollments.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Employee Directory</h1>
+          <p className="text-sm font-medium text-slate-500">Register, manage, and edit employee profiles in the APK roster.</p>
         </div>
         <button
           onClick={handleAddClick}
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-600/10 hover:bg-indigo-700 active:scale-98"
         >
           <Plus className="h-4 w-4" />
-          Add Student
+          Add Employee
         </button>
       </div>
 
@@ -114,7 +114,7 @@ export default function StudentContent() {
           </span>
           <input
             type="text"
-            placeholder="Search by name, email, roll number..."
+            placeholder="Search by name, email, employee ID..."
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
@@ -124,48 +124,49 @@ export default function StudentContent() {
           />
         </div>
 
-        {/* Class Filter */}
+        {/* Role Filter */}
         <div className="flex items-center gap-2 sm:w-48">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 hidden sm:inline">Class:</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400 hidden sm:inline">Role:</span>
           <select
-            value={selectedClass}
+            value={selectedRole}
             onChange={(e) => {
-              setSelectedClass(e.target.value);
+              setSelectedRole(e.target.value);
               setCurrentPage(1);
             }}
             className="w-full rounded-xl border border-slate-200 bg-white py-2 px-3 text-sm font-semibold text-slate-700 outline-none transition-all focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
           >
-            {classes.map((cls) => (
-              <option key={cls} value={cls}>
-                {cls}
+            {roles.map((r) => (
+              <option key={r} value={r}>
+                {r}
               </option>
             ))}
           </select>
         </div>
       </div>
 
-      {/* 3. Student Table Card */}
+      {/* 3. Employee Table Card */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-100/50">
         {loading ? (
           <div className="flex min-h-[300px] flex-col items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-            <p className="mt-3 text-xs font-bold text-slate-400 uppercase tracking-widest">Querying student logs...</p>
+            <p className="mt-3 text-xs font-bold text-slate-400 uppercase tracking-widest">Querying employee roster logs...</p>
           </div>
-        ) : paginatedStudents.length > 0 ? (
+        ) : paginatedEmployees.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50 text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   <th className="py-4 px-6">Name</th>
-                  <th className="py-4 px-6">Roll Number</th>
-                  <th className="py-4 px-6">Classroom</th>
+                  <th className="py-4 px-6">Employee Code ID</th>
+                  <th className="py-4 px-6">Role</th>
                   <th className="py-4 px-6">Email Address</th>
+                  <th className="py-4 px-6">Contact Number</th>
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-sm">
-                {paginatedStudents.map((student) => {
-                  const initials = student.full_name
+                {paginatedEmployees.map((emp) => {
+                  const initials = emp.name
                     .split(' ')
                     .map((n) => n[0])
                     .join('')
@@ -173,45 +174,61 @@ export default function StudentContent() {
                     .toUpperCase();
                   
                   return (
-                    <tr key={student.id} className="hover:bg-slate-50/50 transition-colors">
-                      {/* Name with badge */}
+                    <tr key={emp.id} className="hover:bg-slate-50/50 transition-colors">
+                      {/* Name with initials circle */}
                       <td className="py-3.5 px-6">
                         <div className="flex items-center gap-3">
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 font-bold text-indigo-600">
                             {initials}
                           </div>
-                          <span className="font-semibold text-slate-700">{student.full_name}</span>
+                          <span className="font-semibold text-slate-700">{emp.name}</span>
                         </div>
                       </td>
                       
-                      {/* Roll Number */}
-                      <td className="py-3.5 px-6 text-slate-500 font-mono font-medium">{student.roll_number}</td>
+                      {/* Employee ID */}
+                      <td className="py-3.5 px-6 text-slate-500 font-mono font-medium">{emp.employee_id}</td>
                       
-                      {/* Class */}
+                      {/* Role Badge */}
                       <td className="py-3.5 px-6">
-                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-indigo-50/50 px-2.5 py-1 text-xs font-bold text-indigo-600">
-                          <School className="h-3.5 w-3.5" />
-                          {student.class_name}
+                        <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-bold ${
+                          emp.role === 'Admin' 
+                            ? 'bg-rose-50 text-rose-600 border border-rose-100' 
+                            : 'bg-indigo-50/50 text-indigo-600'
+                        }`}>
+                          <Shield className="h-3.5 w-3.5" />
+                          {emp.role || 'Employee'}
                         </span>
                       </td>
 
                       {/* Email */}
-                      <td className="py-3.5 px-6 text-slate-500 font-medium">{student.email}</td>
+                      <td className="py-3.5 px-6 text-slate-500 font-medium">{emp.email}</td>
+
+                      {/* Phone */}
+                      <td className="py-3.5 px-6 text-slate-500 font-medium">
+                        {emp.phone ? (
+                          <span className="flex items-center gap-1.5">
+                            <Phone className="h-3.5 w-3.5 text-slate-400" />
+                            {emp.phone}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 italic">No number listed</span>
+                        )}
+                      </td>
 
                       {/* Actions */}
                       <td className="py-3.5 px-6 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <button
-                            onClick={() => handleEditClick(student)}
+                            onClick={() => handleEditClick(emp)}
                             className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-indigo-600 transition-colors"
                             title="Edit Profile"
                           >
                             <Edit2 className="h-3.5 w-3.5" />
                           </button>
                           <button
-                            onClick={() => handleDelete(student.id, student.full_name)}
+                            onClick={() => handleDelete(emp.employee_id, emp.name)}
                             className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                            title="Delete Student"
+                            title="Delete Employee"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
@@ -230,16 +247,16 @@ export default function StudentContent() {
             </div>
             <h3 className="text-md font-bold text-slate-700">No Roster Entries Match</h3>
             <p className="mx-auto mt-1 max-w-sm text-xs leading-relaxed text-slate-400 font-semibold">
-              We couldn't locate any student files aligning with your search metrics. Try adjusting your grade selector or typing custom queries.
+              We couldn't locate any employee records matching your search queries. Try enlisting employees or adjusting filters.
             </p>
           </div>
         )}
 
         {/* 4. Table Pagination Controls */}
-        {!loading && filteredStudents.length > 0 && (
+        {!loading && filteredEmployees.length > 0 && (
           <div className="flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
             <span className="text-xs font-semibold text-slate-400">
-              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredStudents.length)} of {filteredStudents.length} students
+              Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredEmployees.length)} of {filteredEmployees.length} employees
             </span>
             <div className="flex items-center gap-1.5">
               <button
@@ -267,7 +284,7 @@ export default function StudentContent() {
       {/* 5. Add / Edit Modal Drawer */}
       {isFormOpen && (
         <StudentForm
-          student={editingStudent}
+          employee={editingEmployee}
           onClose={() => setIsFormOpen(false)}
           onSuccess={handleFormSuccess}
         />

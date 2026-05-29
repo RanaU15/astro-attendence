@@ -1,60 +1,84 @@
-// Central TypeScript Interfaces
+// Central TypeScript Interfaces for Attendance APK Backend
 
-export interface Student {
-  id: string;
-  full_name: string;
+export interface Employee {
+  id: number;
+  employee_id: string;
+  name: string;
   email: string;
-  roll_number: string;
-  class_name: string;
+  password?: string;
+  phone?: string;
+  role: string;
+  image_url?: string;
   created_at?: string;
 }
 
-export type AttendanceStatus = 'Present' | 'Absent';
-
-export interface Attendance {
-  id: string;
-  student_id: string;
-  attendance_date: string;
-  status: AttendanceStatus;
-  created_at?: string;
+export interface AttendanceLog {
+  id: number;
+  employee_id: string;
+  email: string;
+  clock_type: string; // 'Login' | 'Logout'
+  login_time?: string;
+  logout_time?: string;
+  break_hours?: number;
+  total_hours?: number;
+  net_hours?: number;
+  location?: string;
+  photo_url?: string;
+  latitude?: number;
+  longitude?: number;
+  clock_in?: string;
+  clock_out?: string;
+  created_at: string;
 }
 
-// Joined Query Structures
-export interface AttendanceRecord extends Attendance {
-  students?: Student;
+export interface TravelSession {
+  id: number;
+  employee_id: string;
+  start_time?: string;
+  reached_time?: string;
+  end_time?: string;
+  start_lat?: number;
+  start_lng?: number;
+  reached_lat?: number;
+  reached_lng?: number;
+  end_lat?: number;
+  end_lng?: number;
+  start_photo_url?: string;
+  reached_photo_url?: string;
+  end_photo_url?: string;
+  start_address?: string;
+  reached_address?: string;
+  end_address?: string;
+  reached_distance?: number;
+  total_distance?: number;
+  status: 'active' | 'reached' | 'completed';
+  created_at: string;
 }
 
-// Reusable UI Stats & Analytics Types
+// Unified UI Metrics
 export interface DashboardMetrics {
-  totalStudents: number;
-  presentToday: number;
-  absentToday: number;
-  attendancePercentage: number;
+  totalEmployees: number;
+  activeEmployees: number;
+  totalTravelToday: number;
+  totalAttendanceToday: number;
 }
 
-export interface WeeklyAttendanceData {
+export interface WeeklyActivityTrend {
   date: string; // E.g., "Mon", "Tue"
-  Present: number;
-  Absent: number;
+  Logins: number;
+  Travels: number;
 }
 
-export interface MonthlyAttendanceData {
-  month: string; // E.g., "Jan", "Feb"
-  rate: number;  // E.g., 94.5 (percentage)
-}
-
-export interface ClassAttendanceSummary {
-  class_name: string;
+export interface DepartmentSummary {
+  department: string; // E.g., "Sales", "Delivery", "Engineering"
   total: number;
-  present: number;
-  absent: number;
+  active: number;
   percentage: number;
 }
 
-export interface StudentAttendanceStats {
-  student: Student;
+export interface EmployeeAttendanceStats {
+  employee: Employee;
   totalDays: number;
   presentDays: number;
-  absentDays: number;
   percentage: number;
 }
