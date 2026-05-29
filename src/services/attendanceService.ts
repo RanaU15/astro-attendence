@@ -18,7 +18,7 @@ export async function getAllAttendanceLogs(): Promise<JoinedAttendanceLog[]> {
   
   // Strategy: Fetch all logs and zip with employees
   const [logsResult, employees] = await Promise.all([
-    supabase.from('attendance').select('*').order('created_at', { ascending: false }),
+    supabase.from('attendance').select('*').order('login_time', { ascending: false }),
     getAllEmployees()
   ]);
 
@@ -60,9 +60,9 @@ export async function getAttendanceLogsByDate(dateStr: string): Promise<JoinedAt
     supabase
       .from('attendance')
       .select('*')
-      .gte('created_at', `${dateStr}T00:00:00Z`)
-      .lte('created_at', `${dateStr}T23:59:59Z`)
-      .order('created_at', { ascending: false }),
+      .gte('login_time', `${dateStr}T00:00:00Z`)
+      .lte('login_time', `${dateStr}T23:59:59Z`)
+      .order('login_time', { ascending: false }),
     getAllEmployees()
   ]);
 

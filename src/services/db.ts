@@ -14,15 +14,15 @@ export async function getLatestActiveDate(): Promise<string> {
   console.log('[DEBUG] Calling getLatestActiveDate()...');
   try {
     const [attResult, travelResult] = await Promise.all([
-      supabase.from('attendance').select('created_at').order('created_at', { ascending: false }).limit(1),
+      supabase.from('attendance').select('login_time').order('login_time', { ascending: false }).limit(1),
       supabase.from('travel_sessions').select('created_at').order('created_at', { ascending: false }).limit(1)
     ]);
 
     let latestDate = new Date();
     let latestTime = 0;
 
-    if (attResult.data && attResult.data.length > 0) {
-      const d = new Date(attResult.data[0].created_at);
+    if (attResult.data && attResult.data.length > 0 && attResult.data[0].login_time) {
+      const d = new Date(attResult.data[0].login_time);
       if (d.getTime() > latestTime) {
         latestTime = d.getTime();
         latestDate = d;
@@ -62,9 +62,9 @@ export async function getDashboardMetrics(dateStr: string): Promise<DashboardMet
     // 2. Get attendance logs today (all check-ins/check-outs)
     const { data: attendanceToday, error: attErr } = await supabase
       .from('attendance')
-      .select('employee_id, clock_type')
-      .gte('created_at', `${dateStr}T00:00:00Z`)
-      .lte('created_at', `${dateStr}T23:59:59Z`);
+      .select('employee_id, clock_type, login_time')
+      .gte('login_time', `${dateStr}T00:00:00Z`)
+      .lte('login_time', `${dateStr}T23:59:59Z`);
 
     if (attErr) throw attErr;
 
@@ -128,8 +128,8 @@ export async function getWeeklyActivityTrend(endDateStr: string): Promise<Weekly
         supabase
           .from('attendance')
           .select('id')
-          .gte('created_at', `${targetDateStr}T00:00:00Z`)
-          .lte('created_at', `${targetDateStr}T23:59:59Z`),
+          .gte('login_time', `${targetDateStr}T00:00:00Z`)
+          .lte('login_time', `${targetDateStr}T23:59:59Z`),
         supabase
           .from('travel_sessions')
           .select('id')
@@ -170,8 +170,8 @@ export async function getRoleSummaryReport(dateStr: string): Promise<DepartmentS
     const { data: attendanceToday, error: attErr } = await supabase
       .from('attendance')
       .select('employee_id')
-      .gte('created_at', `${dateStr}T00:00:00Z`)
-      .lte('created_at', `${dateStr}T23:59:59Z`);
+      .gte('login_time', `${dateStr}T00:00:00Z`)
+      .lte('login_time', `${dateStr}T23:59:59Z`);
 
     if (attErr) throw attErr;
 

@@ -213,13 +213,13 @@ export default function AttendanceContent() {
                             {loginLog && (
                               <div className="flex items-center gap-1">
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-1 py-0.5 rounded">In:</span>
-                                <span>{new Date(loginLog.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>{new Date(loginLog.login_time || loginLog.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
                             )}
                             {logoutLog && (
                               <div className="flex items-center gap-1">
                                 <span className="text-[9px] font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-1 py-0.5 rounded">Out:</span>
-                                <span>{new Date(logoutLog.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                                <span>{new Date(logoutLog.login_time || logoutLog.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                               </div>
                             )}
                             {!loginLog && !logoutLog && <span className="text-slate-400 italic">No actions logged</span>}
